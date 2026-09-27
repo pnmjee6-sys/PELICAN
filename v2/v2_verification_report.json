@@ -1,0 +1,51 @@
+{
+  "version": "2.0.0",
+  "description": "V2 backend contract simulation; live browser verification is separate",
+  "browser_verified": false,
+  "timestamp": "2026-09-25T19:49:28Z",
+  "gates": {
+    "gate_1_capture_off_sends_nothing": {
+      "ok": true,
+      "capture_off_behavior": "dropped_capture_off",
+      "secret_screening_behavior": "dropped_secret_screened",
+      "network_requests_sent": 0
+    },
+    "gate_2_three_sites_capture_user_only": {
+      "ok": true,
+      "chatgpt_captured": true,
+      "claude_captured": true,
+      "gemini_captured": true,
+      "assistant_replies_ignored": true
+    },
+    "gate_3_cross_site_use_memory": {
+      "ok": true,
+      "fact_learned_source": "chatgpt.com",
+      "recalled_on_claude": true,
+      "recalled_on_gemini": true,
+      "claude_snippets": [
+        "User specializes in building high-performance WebAssembly audio DSP plugins"
+      ],
+      "gemini_snippets": [
+        "User specializes in building high-performance WebAssembly audio DSP plugins"
+      ]
+    },
+    "gate_4_sensitive_pauses_for_approval": {
+      "ok": true,
+      "sensitive_candidates_count": 1,
+      "candidate_snippets": [
+        "User has a severe life-threatening allergy to peanuts and tree nuts"
+      ]
+    },
+    "gate_5_denial_excludes_sensitive_context": {
+      "ok": true,
+      "prompt_on_denial_contains_sensitive": false,
+      "prompt_on_allow_contains_sensitive": true
+    },
+    "gate_6_no_duplicate_memories_on_repeated_updates": {
+      "ok": true,
+      "composer_block_count_after_3_clicks": 1,
+      "duplicate_ingest_status": "duplicate_skipped"
+    }
+  },
+  "all_passed": true
+}

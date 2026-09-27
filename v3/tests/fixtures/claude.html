@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Claude</title>
+</head>
+<body class="font-sans">
+  <div id="root">
+    <div class="flex min-h-screen w-full">
+      <!-- Navigation Sidebar -->
+      <nav class="claude-sidebar">
+        <a href="/chat/claude-saved-convo-1" class="recent-chat">TypeScript Compiler Design</a>
+        <a href="/chat/claude-saved-convo-2" class="recent-chat">CSS Grid Layout</a>
+      </nav>
+      <!-- Main Chat Area -->
+      <main class="flex-1 chat-pane">
+        <div class="chat-container" id="claude-messages">
+          <!-- Historical user turn loaded on page visit -->
+          <div data-testid="user-message" class="user-turn">
+            <div class="font-user-message">
+              <p>Historical user question asked in Claude.</p>
+            </div>
+          </div>
+          <!-- Historical assistant turn -->
+          <div data-testid="assistant-message" class="assistant-turn">
+            <div class="font-claude-message">
+              <p>Historical Claude response answering the query.</p>
+            </div>
+          </div>
+        </div>
+        <!-- Composer Fieldset -->
+        <fieldset class="relative flex w-full flex-col">
+          <div contenteditable="true" class="ProseMirror" role="textbox" aria-multiline="true" aria-label="Write your prompt to Claude"></div>
+          <button aria-label="Send Message" type="button" class="claude-send-btn">
+            <svg viewBox="0 0 16 16"><path d="M.5 1.5l15 6.5-15 6.5v-5l9-1.5-9-1.5z"/></svg>
+          </button>
+        </fieldset>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

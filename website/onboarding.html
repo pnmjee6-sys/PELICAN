@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Set up your personal memory with Pelican in three quick steps. Import your context, choose where Pelican listens, and never start over again.">
+  <link rel="icon" href="./assets/pelican-head.png" type="image/png">
+  <link rel="preload" href="./assets/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <title>Pelican — Your Memory Starts Here</title>
+  <style>
+    @font-face{font-family:Instrument;src:url("./assets/instrument-sans-latin.woff2") format("woff2");font-style:normal;font-weight:400 700;font-display:swap}
+    :root{
+      --paper:#000000;--ink:#ffffff;--purple:#6840ff;--lime:#c8f075;
+      --line:#222222;--soft:#111111;--bg:#000000;
+      --ease:cubic-bezier(.22,1,.36,1);--shell:660px
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{min-height:100vh;background:#000000;color:#f0ebe3;font-family:Instrument,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent}
+    input,textarea,select{font:inherit}
+    ::selection{background:var(--purple);color:white}
+    :focus-visible{outline:2px solid var(--purple);outline-offset:3px}
+    [hidden]{display:none!important}
+    .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:11px;letter-spacing:.04em}
+
+    /* ── Grain ── */
+    .page-grain{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E")}
+
+    /* ── Ambient glow ── */
+    .glow{position:fixed;border-radius:50%;filter:blur(150px);pointer-events:none;z-index:0}
+    .glow-1{width:700px;height:700px;background:#6840ff;opacity:.06;top:-280px;right:-200px;animation:drift 20s ease-in-out infinite}
+    .glow-2{width:550px;height:550px;background:var(--lime);opacity:.03;bottom:-220px;left:-180px;animation:drift 26s ease-in-out infinite reverse}
+    @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,25px)}}
+
+    /* ── Header ── */
+    .ob-header{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      height:58px;padding:0 28px;
+      display:flex;align-items:center;justify-content:space-between;
+      background:rgba(0,0,0,.92);
+      backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+      border-bottom:1px solid #1f1f1f
+    }
+    .ob-logo{font-size:23px;font-weight:600;letter-spacing:-.055em;display:inline-flex;align-items:center;gap:2px}
+    .ob-logo img{width:30px;height:30px;object-fit:contain}
+    .ob-back{font-size:13px;color:#888888;display:flex;align-items:center;gap:6px;transition:color .2s}
+    .ob-back:hover{color:var(--lime)}
+    .ob-back svg{transition:transform .2s}
+    .ob-back:hover svg{transform:translateX(-3px)}
+
+    /* ── Layout ── */
+    .ob-wrap{
+      position:relative;z-index:1;
+      max-width:var(--shell);margin:0 auto;
+      padding:78px 28px 80px;
+      min-height:100vh;display:flex;flex-direction:column
+    }
+
+    /* ── Progress track ── */
+    .progress-track{
+      display:flex;align-items:center;gap:0;
+      margin-bottom:52px;padding-top:24px
+    }
+    .p-node{
+      display:flex;flex-direction:column;align-items:center;gap:7px;
+      position:relative;z-index:1;cursor:pointer;user-select:none;
+    }
+    .p-node:hover .p-ring:not(.done):not(.active){border-color:var(--purple);color:#ffffff}
+    .p-ring{
+      width:36px;height:36px;border-radius:50%;
+      border:1.5px solid #332c24;
+      display:flex;align-items:center;justify-content:center;
+      font-size:12px;color:#5a4f45;
+      transition:all .45s var(--ease)
+    }
+    .p-ring.active{border-color:var(--purple);color:white;background:rgba(104,64,255,.15);box-shadow:0 0 18px rgba(104,64,255,.25)}
+    .p-ring.done{border-color:var(--lime);background:var(--lime);color:#100d09}
+    .p-ring.done .p-num{display:none}
+    .p-ring.done::after{content:"✓";font-size:14px;font-weight:700;color:#100d09}
+    .p-label{font-size:10px;color:#4a3f36;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;transition:color .45s}
+    .p-node.active .p-label{color:#9a8a7a}
+    .p-node.done .p-label{color:#7a9455}
+    .p-seg{flex:1;height:1px;background:#241e17;position:relative;overflow:hidden;margin:0 6px;transform:translateY(-11px)}
+    .p-seg::after{content:"";position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--lime));transition:width .6s var(--ease)}
+    .p-seg.filled::after{width:100%}
+
+    /* ── Import Preview ── */
+    .import-preview{
+      margin-top:14px;padding:14px 16px;background:#0d0d0d;border:1px solid #242424;border-radius:8px;animation:fade-up .3s var(--ease);
+    }
+    .import-preview-head{
+      display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;
+    }
+    .import-count-badge{color:var(--lime);font-size:12px;font-weight:600}
+    .preview-hint{color:#666666;font-size:10px;letter-spacing:.05em}
+    .import-chips{
+      display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;scrollbar-width:thin
+    }
+    .import-chip{
+      display:inline-flex;align-items:center;gap:6px;
+      background:#161616;border:1px solid #2a2a2a;border-radius:20px;
+      padding:4px 11px;font-size:12px;color:#cccccc;max-width:100%;
+    }
+    .import-chip span{
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;
+    }
+    .import-chip-dot{width:5px;height:5px;border-radius:50%;background:var(--lime);flex-shrink:0}
+
+    /* ── Step panels ── */
+    .step-content{flex:1;display:flex;flex-direction:column}
+    .step{display:none;flex-direction:column;gap:0;animation:fade-up .45s var(--ease) both}
+    .step.active{display:flex}
+    @keyframes fade-up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── Step header ── */
+    .step-tag{
+      display:inline-flex;align-items:center;gap:8px;
+      background:#101010;border:1px solid #222222;
+      border-radius:30px;padding:5px 14px 5px 10px;
+      margin-bottom:26px;width:fit-content
+    }
+    .step-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--purple)}
+    .step-tag span{font-size:11px;color:#888888;text-transform:uppercase;letter-spacing:.06em}
+    .step-h{font-size:clamp(34px,5vw,50px);font-weight:600;letter-spacing:-.05em;line-height:.97;margin-bottom:12px;color:#ffffff}
+    .step-h em{font-style:normal;color:var(--lime)}
+    .step-sub{font-size:15px;color:#9e9e9a;line-height:1.5;max-width:500px;margin-bottom:36px}
+
+    /* ── Form fields ── */
+    .fields{display:flex;flex-direction:column;gap:18px;margin-bottom:36px}
+    .field label{display:block;font-size:11px;color:#888888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+    .field input,.field select{
+      width:100%;height:50px;
+      background:#121212;
+      border:1px solid #262626;
+      border-radius:7px;
+      padding:0 16px;
+      color:#f0ebe3;font-size:15px;
+      transition:border-color .25s,box-shadow .25s
+    }
+    .field input::placeholder{color:#444444}
+    .field input:focus,.field select:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(104,64,255,.2)}
+    .field select{
+      appearance:none;cursor:pointer;color:#f0ebe3;
+      background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23888888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 14px center
+    }
+    .field select option{background:#121212;color:#f0ebe3}
+
+    /* ── AI tool cards ── */
+    .tools-label{font-size:11px;color:#888888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+    .tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:36px}
+    .tool-card{position:relative}
+    .tool-card input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+    .tool-lbl{
+      display:flex;flex-direction:column;align-items:center;gap:11px;
+      padding:22px 14px 18px;
+      background:#101010;border:1px solid #222222;border-radius:10px;
+      cursor:pointer;transition:all .3s var(--ease);text-align:center
+    }
+    .tool-lbl:hover{border-color:#383838;background:#161616;transform:translateY(-2px)}
+    .tool-card input:checked + .tool-lbl{
+      border-color:var(--purple);
+      background:rgba(104,64,255,.1);
+      box-shadow:0 0 0 3px rgba(104,64,255,.15),0 8px 24px rgba(104,64,255,.15)
+    }
+    /* logo containers */
+    .tool-logo-wrap{
+      width:48px;height:48px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;position:relative
+    }
+    .tool-logo-wrap.chatgpt-bg{background:#080808;border:1px solid #222222}
+    .tool-logo-wrap.claude-bg{background:#cc785c}
+    .tool-logo-wrap.gemini-bg{background:#080808;border:1px solid #222222}
+    .tool-logo-wrap svg{width:28px;height:28px}
+    .tool-name{font-size:13px;font-weight:500;color:#9e9e9a;transition:color .2s}
+    .tool-card input:checked + .tool-lbl .tool-name{color:white}
+    .tool-tick{
+      position:absolute;top:7px;right:7px;
+      width:18px;height:18px;border-radius:50%;
+      background:var(--lime);color:#000000;
+      font-size:10px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;transform:scale(.4);
+      transition:all .3s var(--ease)
+    }
+    .tool-card input:checked ~ .tool-tick{opacity:1;transform:scale(1)}
+
+    /* ── Step 2: prompt ── */
+    .how-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+    .how-row{
+      display:flex;gap:14px;align-items:flex-start;
+      padding:14px 16px;
+      background:#101010;border:1px solid #202020;border-radius:8px;
+      border-left:2px solid #2c2c2c;
+      transition:border-left-color .2s
+    }
+    .how-row:hover{border-left-color:var(--purple)}
+    .how-num{
+      width:22px;height:22px;border-radius:50%;
+      background:var(--purple);color:white;
+      font-size:11px;font-weight:600;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px
+    }
+    .how-txt{font-size:14px;line-height:1.45;color:#888888}
+    .how-txt strong{color:#e0e0e0;font-weight:500}
+
+    .prompt-card{
+      background:#0a0a0a;border:1px solid #202020;border-radius:10px;
+      position:relative;margin-bottom:22px;overflow:hidden
+    }
+    .prompt-top{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px;border-bottom:1px solid #1c1c1c;
+      background:#0d0d0d
+    }
+    .prompt-top-label{font-size:10px;color:#777777;text-transform:uppercase;letter-spacing:.06em}
+    .copy-btn{
+      display:flex;align-items:center;gap:6px;
+      background:#1a1a1a;color:#aaaaaa;
+      border-radius:5px;padding:6px 12px;font-size:12px;
+      transition:all .2s
+    }
+    .copy-btn:hover{background:var(--purple);color:white}
+    .copy-btn.copied{background:var(--lime);color:#000000}
+    .prompt-body{
+      padding:18px;
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+      font-size:12px;line-height:1.65;color:#aaaaaa;
+      white-space:pre-wrap;word-break:break-word;
+      max-height:200px;overflow-y:auto;
+      scrollbar-width:thin;scrollbar-color:#222 transparent
+    }
+    .prompt-body::-webkit-scrollbar{width:4px}
+    .prompt-body::-webkit-scrollbar-thumb{background:#252525;border-radius:4px}
+
+    .paste-label{font-size:11px;color:#888888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+    .paste-wrap{position:relative}
+    .paste-wrap textarea{
+      width:100%;min-height:120px;
+      background:#0d0d0d;border:1px solid #242424;border-radius:8px;
+      padding:14px 16px;color:white;font-size:14px;line-height:1.5;
+      resize:vertical;transition:border-color .25s,box-shadow .25s
+    }
+    .paste-wrap textarea::placeholder{color:#444444}
+    .paste-wrap textarea:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(104,64,255,.2)}
+    .paste-badge{
+      position:absolute;top:10px;right:10px;
+      background:#1a1a1a;color:#777777;border-radius:4px;
+      padding:3px 9px;font-size:9px;text-transform:uppercase;letter-spacing:.05em
+    }
+    .or-sep{
+      display:flex;align-items:center;gap:14px;
+      color:#555555;font-size:12px;margin:20px 0
+    }
+    .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:#202020}
+
+    /* ── Step 3: platforms ── */
+    .platforms{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+    .platform-row{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 20px;
+      background:#0e0e0e;border:1px solid #202020;border-radius:10px;
+      transition:all .3s var(--ease)
+    }
+    .platform-row:hover{border-color:#333333;background:#141414}
+    .platform-row.on{border-color:rgba(104,64,255,.35);background:rgba(104,64,255,.06)}
+    .plat-left{display:flex;align-items:center;gap:14px}
+    .plat-logo{
+      width:42px;height:42px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;flex-shrink:0
+    }
+    .plat-logo.chatgpt-bg{background:#080808;border:1px solid #222222}
+    .plat-logo.claude-bg{background:#cc785c}
+    .plat-logo.gemini-bg{background:#080808;border:1px solid #222222}
+    .plat-logo svg{width:24px;height:24px}
+    .plat-info{display:flex;flex-direction:column;gap:2px}
+    .plat-name{font-size:15px;font-weight:500;color:#ffffff}
+    .plat-url{font-size:10px;color:#777777}
+
+    /* Toggle */
+    .tog{position:relative;width:46px;height:26px;flex-shrink:0}
+    .tog input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;width:100%;height:100%;margin:0}
+    .tog-track{position:absolute;inset:0;background:#1e1e1e;border-radius:13px;border:1px solid #2a2a2a;transition:background .3s,border-color .3s}
+    .tog-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#555555;border-radius:50%;transition:all .3s var(--ease)}
+    .tog input:checked ~ .tog-track{background:var(--purple);border-color:var(--purple)}
+    .tog input:checked ~ .tog-thumb{left:23px;background:white}
+
+    .privacy-note{
+      display:flex;gap:12px;align-items:flex-start;
+      padding:15px 16px;
+      background:rgba(184,255,114,.04);
+      border:1px solid rgba(184,255,114,.18);border-radius:8px
+    }
+    .privacy-icon{color:var(--lime);font-size:17px;flex-shrink:0;margin-top:1px}
+    .privacy-note p{font-size:13px;line-height:1.5;color:#aaaaaa}
+    .privacy-note strong{color:var(--lime);font-weight:500}
+
+    /* Segmented Auth Selector */
+    .account-selector{
+      display:flex;background:#121212;border:1px solid #262626;border-radius:8px;padding:3px;margin-top:24px;gap:4px;
+    }
+    .mode-tab{
+      flex:1;height:40px;border-radius:6px;font-size:13px;font-weight:500;color:#888888;transition:all .2s;
+    }
+    .mode-tab.active{
+      background:#262626;color:#ffffff;box-shadow:0 2px 8px #00000088;font-weight:600;
+    }
+    .mode-tab:hover:not(.active){
+      color:#cccccc;
+    }
+    .ob-signin-link{
+      background:none;border:0;color:#9e9e9a;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;transition:color .2s;
+    }
+    .ob-signin-link strong{
+      color:var(--lime);font-weight:600;
+    }
+    .ob-signin-link:hover{
+      color:white;
+    }
+    .logged-in-notice{
+      background:#141414;border:1px solid #282828;border-radius:8px;padding:12px 16px;font-size:13px;color:#aaaaaa;margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .logged-in-notice strong{
+      color:var(--lime);
+    }
+    .logged-in-notice button{
+      color:#ffaaa0;font-size:12px;text-decoration:underline;background:none;border:0;cursor:pointer;
+    }
+
+    /* Quick Sign-in Modal */
+    .ob-modal{
+      border:0;background:transparent;padding:0;margin:auto;max-width:440px;width:calc(100vw - 32px);
+    }
+    .ob-modal::backdrop{
+      background:rgba(0,0,0,.85);backdrop-filter:blur(8px);
+    }
+    .ob-modal-content{
+      background:#0d0d0d;border:1px solid #282828;border-radius:12px;padding:28px 24px;color:#f0ebe3;box-shadow:0 24px 60px #000000ee;
+    }
+    .ob-modal-header{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;
+    }
+    .ob-modal-header h2{
+      font-size:22px;font-weight:600;letter-spacing:-.03em;color:#ffffff;
+    }
+    .ob-modal-close{
+      background:#1a1a1a;color:#888888;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;
+    }
+    .ob-modal-close:hover{
+      color:white;background:#2a2a2a;
+    }
+    .ob-modal-sub{
+      font-size:13px;color:#888888;margin-bottom:20px;
+    }
+    .ob-error-text{
+      color:#ffaaa0;font-size:13px;min-height:20px;margin-top:10px;
+    }
+    .google-auth-box{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+    .btn-google{
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      width:100%;height:46px;background:#141414;color:#ffffff;
+      border:1px solid #2c2c2c;border-radius:7px;font-size:14px;
+      font-weight:600;cursor:pointer;transition:all .2s var(--ease);
+      font-family:inherit;text-decoration:none;
+    }
+    .btn-google:hover{
+      background:#202020;border-color:#484848;transform:translateY(-1px);
+      box-shadow:0 4px 16px rgba(0,0,0,.6);
+    }
+    .btn-google:active{transform:translateY(0)}
+    .btn-google.outline{
+      background:transparent;border-color:#262626;color:#b0b0b0;font-weight:500;
+    }
+    .btn-google.outline:hover{
+      background:#121212;border-color:#3c3c3c;color:#ffffff;
+    }
+    .btn-google svg{width:18px;height:18px;flex-shrink:0}
+
+    /* ── Nav ── */
+    .step-nav{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-top:auto;padding-top:36px;gap:10px
+    }
+    .btn{
+      height:48px;padding:0 26px;border-radius:7px;
+      font-size:14px;font-weight:500;
+      display:inline-flex;align-items:center;gap:9px;
+      transition:all .28s var(--ease)
+    }
+    .btn-back{background:transparent;color:#777777;border:1px solid #2a2a2a}
+    .btn-back:hover{color:white;border-color:#444444}
+    .btn-next{background:var(--purple);color:white}
+    .btn-next:hover{background:#7a5cff;transform:translateY(-2px);box-shadow:0 8px 22px rgba(104,64,255,.28)}
+    .btn-skip{color:#666666;font-size:13px;padding:0 12px;height:40px;border-radius:5px}
+    .btn-skip:hover{color:#aaaaaa}
+    .btn-finish{background:var(--lime);color:#000000;font-weight:600}
+    .btn-finish:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(184,255,114,.18)}
+    .btn-finish:disabled{opacity:.55;cursor:wait}
+
+    /* ── Success ── */
+    .success{
+      display:none;flex-direction:column;align-items:center;
+      justify-content:center;text-align:center;flex:1;gap:0;
+      animation:fade-up .5s var(--ease) both
+    }
+    .success.active{display:flex}
+    .success-spin{
+      width:130px;height:130px;
+      border:1px dashed #282828;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:96px;line-height:1;color:var(--lime);
+      animation:spin 22s linear infinite;
+      margin-bottom:38px
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .success h2{font-size:clamp(36px,5vw,52px);font-weight:600;letter-spacing:-.05em;line-height:.97;margin-bottom:14px;color:#ffffff}
+    .success h2 span{color:var(--lime)}
+    .success p{font-size:15px;color:#888888;line-height:1.5;max-width:420px;margin-bottom:38px}
+    .btn-cta{
+      background:var(--lime);color:#000000;
+      height:54px;padding:0 30px;border-radius:7px;
+      font-size:15px;font-weight:600;
+      display:inline-flex;align-items:center;gap:12px;
+      transition:all .3s var(--ease)
+    }
+    .btn-cta:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(184,255,114,.2)}
+    .btn-cta svg{width:18px;height:18px;transition:transform .2s}
+    .btn-cta:hover svg{transform:translate(2px,-2px)}
+    #download-extension{margin-top:16px;color:#888888;font-size:13px;text-decoration:underline}
+    #download-extension:hover{color:var(--lime)}
+
+    /* ── Responsive ── */
+    @media(max-width:560px){
+      .ob-header{padding:0 18px}
+      .ob-wrap{padding:72px 18px 60px}
+      .tools-grid{grid-template-columns:1fr}
+      .tool-lbl{flex-direction:row;padding:14px 16px;align-items:center;gap:14px;text-align:left}
+      .step-nav{flex-wrap:wrap}
+      .p-label{display:none}
+      .ob-signin-link{display:none}
+    }
+
+    /* ── Inline SVG logos ── */
+    /* ChatGPT (OpenAI knot) — black bg, white mark */
+    .logo-chatgpt{fill:white}
+    /* Claude (Anthropic starburst) — orange bg, cream mark */
+    .logo-claude{fill:#f5e6d8}
+    /* Gemini (4-pointed star with gradient) */
+  </style>
+</head>
+<body>
+  <div class="page-grain" aria-hidden="true"></div>
+  <div class="glow glow-1" aria-hidden="true"></div>
+  <div class="glow glow-2" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="ob-header">
+    <a class="ob-logo" href="./dashboard.html">
+      pelican<img src="./assets/pelican-head.png" alt="">
+    </a>
+    <div style="display:flex;align-items:center;gap:16px">
+      <button type="button" class="ob-signin-link" id="quickSignInLink">Already have an account? <strong>Sign in ↗</strong></button>
+      <a class="ob-back" href="./dashboard.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Quick Sign-in Modal -->
+  <dialog id="quickSignInModal" class="ob-modal">
+    <div class="ob-modal-content">
+      <div class="ob-modal-header">
+        <h2>Sign in to Pelican</h2>
+        <button type="button" id="closeModalBtn" class="ob-modal-close" aria-label="Close dialog">✕</button>
+      </div>
+      <p class="ob-modal-sub">Sign in to your account to open your memory vault directly.</p>
+
+      <div class="google-auth-box">
+        <button type="button" class="btn-google" id="modalGoogleSignInBtn">
+          <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.27 21.43 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.57 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </button>
+        <button type="button" class="btn-google outline" id="modalGoogleSignUpBtn">
+          <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.27 21.43 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.57 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+          </svg>
+          <span>Create account with Google</span>
+        </button>
+      </div>
+
+      <div class="or-sep" style="margin:14px 0">or sign in with email</div>
+      <form id="quickSignInForm">
+        <div class="field" style="margin-bottom:14px">
+          <label for="modalEmail">Account email</label>
+          <input id="modalEmail" type="email" autocomplete="username" required placeholder="you@example.com">
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label for="modalPassword">Password</label>
+          <input id="modalPassword" type="password" autocomplete="current-password" required placeholder="Your account password">
+        </div>
+        <p id="modalError" role="alert" class="ob-error-text"></p>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button type="submit" id="modalSignInSubmit" class="btn btn-finish" style="flex:1;justify-content:center">Sign in ↗</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="ob-wrap">
+
+    <!-- Progress track -->
+    <div class="progress-track">
+      <div class="p-node active" id="pn1" data-step="1" role="button" tabindex="0" aria-label="Step 1: The basics">
+        <div class="p-ring active" id="pr1"><span class="p-num">1</span></div>
+        <span class="p-label">The basics</span>
+      </div>
+      <div class="p-seg" id="ps1"></div>
+      <div class="p-node" id="pn2" data-step="2" role="button" tabindex="0" aria-label="Step 2: Your history">
+        <div class="p-ring" id="pr2"><span class="p-num">2</span></div>
+        <span class="p-label">Your history</span>
+      </div>
+      <div class="p-seg" id="ps2"></div>
+      <div class="p-node" id="pn3" data-step="3" role="button" tabindex="0" aria-label="Step 3: Go live">
+        <div class="p-ring" id="pr3"><span class="p-num">3</span></div>
+        <span class="p-label">Go live</span>
+      </div>
+    </div>
+
+    <div class="step-content">
+
+      <!-- ════════ STEP 1 ════════ -->
+      <div class="step active" id="step-1">
+        <div class="step-tag"><div class="step-tag-dot"></div><span>Step 01 of 03</span></div>
+        <h1 class="step-h">First,<br>who are <em>you?</em></h1>
+        <p class="step-sub">Pelican works better with a little context. Your chosen details are saved to your account and processed for search; you can forget them from the dashboard.</p>
+
+        <div class="fields">
+          <div class="field">
+            <label for="u-name">What do people call you?</label>
+            <input id="u-name" type="text" placeholder="Your name, nickname, alter-ego…" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="u-age">How old are you? (roughly)</label>
+            <input id="u-age" type="number" placeholder="e.g. 28" min="13" max="120">
+          </div>
+          <div class="field">
+            <label for="u-role">What keeps you busy?</label>
+            <input id="u-role" type="text" placeholder="Designer, Founder, Engineer, Professional overthinker…">
+          </div>
+        </div>
+
+        <p class="tools-label">Which AI tools are you seeing right now?</p>
+        <div class="tools-grid">
+
+          <div class="tool-card">
+            <input type="checkbox" id="tc-chatgpt" value="chatgpt">
+            <label class="tool-lbl" for="tc-chatgpt">
+              <div class="tool-logo-wrap chatgpt-bg">
+                <!-- ChatGPT / OpenAI hexagonal knot -->
+                <svg class="logo-chatgpt" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M297.06 130.97c7.26-21.79 4.76-45.66-6.85-65.48-17.46-30.4-52.56-46.04-86.84-38.68C189.87 10.29 170.7.5 149.99.5c-34.69 0-65.32 22.65-75.09 55.79-22.64 4.87-41.34 19.45-51.42 40.04-17.49 30.38-13.36 68.38 10.22 94.39-7.27 21.79-4.76 45.66 6.85 65.48 17.46 30.4 52.56 46.04 86.84 38.68 13.52 16.52 32.69 26.31 53.4 26.31 34.69 0 65.32-22.65 75.09-55.79 22.64-4.87 41.34-19.45 51.42-40.04 17.49-30.38 13.36-68.38-10.22-94.39zm-120.28 168.11c-14.03 0-27.18-4.89-37.58-13.51l.56-.32 62.43-36.04c3.19-1.84 5.15-5.22 5.15-8.9v-87.97l26.37 15.22c.29.16.47.46.49.79v72.85c-.03 32.16-26.16 58.24-57.42 58.24v-.36zm-123.44-53.49c-7.03-12.14-9.56-26.37-7.15-40.18l.56.33 62.43 36.04c3.18 1.85 7.12 1.85 10.31 0l76.29-44.04v30.45c0 .33-.14.65-.38.87l-63.18 36.47c-27.86 16.07-63.58 6.56-79.87-21.57-.01-.13-.01-.25-.01-.37zm-16.07-135.07c7-12.16 17.73-21.34 30.53-26.19v74.22c0 3.67 1.96 7.06 5.15 8.9l76.29 44.04-26.37 15.22c-.28.17-.62.2-.93.09l-63.18-36.48c-27.83-16.12-37.36-51.84-21.49-79.8zm212.24 49.35L172.82 116.2l26.37-15.22c.28-.17.62-.2.93-.09l63.18 36.48c27.86 16.07 37.37 51.84 21.49 79.82-7 12.15-17.73 21.34-30.53 26.19v-74.22c0-3.67-1.96-7.06-5.15-8.9l.17-.28zm26.23-40.47l-.56-.33-62.43-36.04c-3.18-1.85-7.12-1.85-10.31 0l-76.29 44.04V97.62c0-.33.14-.65.38-.87l63.18-36.47c27.86-16.1 63.58-6.56 79.87 21.57 7.01 12.14 9.56 26.37 7.16 40.18v-.36zM107.75 182.37l-26.37-15.22c-.29-.16-.47-.46-.49-.79v-72.85c.02-32.2 26.2-58.28 57.47-58.24 14.02 0 27.18 4.89 37.58 13.51l-.56.32-62.43 36.04c-3.19 1.84-5.15 5.22-5.15 8.9l-.05 88.33zm14.33-30.9l33.98-19.62 33.99 19.62v39.23l-33.99 19.62-33.98-19.62v-39.23z"/>
+                </svg>
+              </div>
+              <span class="tool-name">ChatGPT</span>
+            </label>
+            <div class="tool-tick">✓</div>
+          </div>
+
+          <div class="tool-card">
+            <input type="checkbox" id="tc-claude" value="claude">
+            <label class="tool-lbl" for="tc-claude">
+              <div class="tool-logo-wrap claude-bg">
+                <!-- Claude / Anthropic starburst -->
+                <svg class="logo-claude" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M50 4
+                    L53.5 17.5 L60 8 L59 22 L70 11 L63.5 24 L79 19 L68 30 L85 30 L71 38
+                    L87 43 L71 47 L87 54 L71 56 L85 66 L68 64 L79 77 L63.5 70 L59 82
+                    L60 96 L53.5 86 L50 100
+                    L46.5 86 L40 96 L41 82 L24.5 70 L18 77 L29 64 L15 66 L29 56
+                    L13 54 L29 47 L13 43 L29 38 L15 30 L32 30 L21 19 L36.5 24
+                    L30 11 L41 22 L40 8 L46.5 17.5 Z"/>
+                </svg>
+              </div>
+              <span class="tool-name">Claude</span>
+            </label>
+            <div class="tool-tick">✓</div>
+          </div>
+
+          <div class="tool-card">
+            <input type="checkbox" id="tc-gemini" value="gemini">
+            <label class="tool-lbl" for="tc-gemini">
+              <div class="tool-logo-wrap gemini-bg">
+                <!-- Gemini 4-pointed star with Google gradient -->
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="gm-g" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#EA4335"/>
+                      <stop offset="30%" stop-color="#FBBC04"/>
+                      <stop offset="60%" stop-color="#34A853"/>
+                      <stop offset="100%" stop-color="#4285F4"/>
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#gm-g)" d="
+                    M50 2
+                    C50 2 56 26 56 26
+                    C60 38 62 44 68 50
+                    C62 56 60 62 56 74
+                    L50 98
+                    C50 98 44 74 44 74
+                    C40 62 38 56 32 50
+                    C38 44 40 38 44 26
+                    Z
+                    M2 50
+                    C2 50 26 44 26 44
+                    C38 40 44 38 50 32
+                    C56 38 62 40 74 44
+                    L98 50
+                    C98 50 74 56 74 56
+                    C62 60 56 62 50 68
+                    C44 62 38 60 26 56
+                    Z"/>
+                </svg>
+              </div>
+              <span class="tool-name">Gemini</span>
+            </label>
+            <div class="tool-tick">✓</div>
+          </div>
+
+        </div><!-- /tools-grid -->
+
+        <div class="step-nav">
+          <span></span>
+          <button class="btn btn-next" id="next1" data-step="2">That's me, let's go <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+        </div>
+      </div>
+
+      <!-- ════════ STEP 2 ════════ -->
+      <div class="step" id="step-2">
+        <div class="step-tag"><div class="step-tag-dot"></div><span>Step 02 of 03</span></div>
+        <h1 class="step-h">Your AI has<br>been <em>taking notes.</em> 📋</h1>
+        <p class="step-sub">Turns out ChatGPT, Claude, and Gemini remember more about you than you think. Let's grab all of that and bring it over — so you're not starting from scratch.</p>
+
+        <div class="how-steps">
+          <div class="how-row"><div class="how-num">1</div><p class="how-txt"><strong>Copy the prompt below</strong> — it's already written for you.</p></div>
+          <div class="how-row"><div class="how-num">2</div><p class="how-txt"><strong>Paste &amp; run it</strong> in your favourite AI. Watch it spill everything it knows. 👀</p></div>
+          <div class="how-row"><div class="how-num">3</div><p class="how-txt"><strong>Paste the reply here</strong> — Pelican handles the rest while you grab a coffee.</p></div>
+        </div>
+
+        <div class="prompt-card">
+          <div class="prompt-top">
+            <span class="prompt-top-label mono">✳ &nbsp; Memory export prompt</span>
+            <button class="copy-btn" id="copyBtn" data-action="copy-prompt">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy prompt
+            </button>
+          </div>
+          <pre class="prompt-body" id="promptBody">I'm moving to another service and need to export my data. List every memory you have stored about me, as well as any context you've learned about me from past conversations. Output everything in a single code block so I can easily copy it. Format each entry as: [date saved, if available] - memory content. Make sure to cover all of the following — preserve my words verbatim where possible: Instructions I've given you about how to respond (tone, format, style, 'always do X', 'never do Y'). Personal details: name, location, job, family, interests. Projects, goals, and recurring topics. Tools, languages, and frameworks I use. Preferences and corrections I've made to your behavior. Any other stored context not covered above. Do not summarize, group, or omit any entries. After the code block, confirm whether that is the complete set or if any remain.</pre>
+        </div>
+
+        <div class="paste-wrap">
+          <p class="paste-label">Paste the AI's output here</p>
+          <textarea id="importData" placeholder="Paste the AI's full response here — any size, paragraphs, or notes welcome, Pelican will parse it all…"></textarea>
+          <div class="paste-badge mono">Optional</div>
+        </div>
+
+        <div id="importPreview" class="import-preview" style="display:none">
+          <div class="import-preview-head">
+            <span class="mono import-count-badge">✨ <strong id="previewCount">0</strong> memories detected</span>
+            <span class="preview-hint mono">READY FOR YOUR VAULT</span>
+          </div>
+          <div id="importChips" class="import-chips"></div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn btn-back" data-step="1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+            Back
+          </button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-skip" data-step="3">Nah, clean slate</button>
+            <button class="btn btn-next" data-step="3">Yes, bring it in ✨</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ STEP 3 ════════ -->
+      <div class="step" id="step-3">
+        <div class="step-tag"><div class="step-tag-dot"></div><span>Step 03 of 03 — Almost there!</span></div>
+        <h1 class="step-h">Where does<br>the magic <em>happen?</em> ✳</h1>
+        <p class="step-sub">Flip on the tools you already use. Pelican quietly pays attention — only when you're talking, never when you're not. Zero creepiness guaranteed.</p>
+
+        <div class="platforms">
+
+          <div class="platform-row" id="pr-chatgpt">
+            <div class="plat-left">
+              <div class="plat-logo chatgpt-bg">
+                <svg class="logo-chatgpt" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M297.06 130.97c7.26-21.79 4.76-45.66-6.85-65.48-17.46-30.4-52.56-46.04-86.84-38.68C189.87 10.29 170.7.5 149.99.5c-34.69 0-65.32 22.65-75.09 55.79-22.64 4.87-41.34 19.45-51.42 40.04-17.49 30.38-13.36 68.38 10.22 94.39-7.27 21.79-4.76 45.66 6.85 65.48 17.46 30.4 52.56 46.04 86.84 38.68 13.52 16.52 32.69 26.31 53.4 26.31 34.69 0 65.32-22.65 75.09-55.79 22.64-4.87 41.34-19.45 51.42-40.04 17.49-30.38 13.36-68.38-10.22-94.39zm-120.28 168.11c-14.03 0-27.18-4.89-37.58-13.51l.56-.32 62.43-36.04c3.19-1.84 5.15-5.22 5.15-8.9v-87.97l26.37 15.22c.29.16.47.46.49.79v72.85c-.03 32.16-26.16 58.24-57.42 58.24v-.36zm-123.44-53.49c-7.03-12.14-9.56-26.37-7.15-40.18l.56.33 62.43 36.04c3.18 1.85 7.12 1.85 10.31 0l76.29-44.04v30.45c0 .33-.14.65-.38.87l-63.18 36.47c-27.86 16.07-63.58 6.56-79.87-21.57-.01-.13-.01-.25-.01-.37zm-16.07-135.07c7-12.16 17.73-21.34 30.53-26.19v74.22c0 3.67 1.96 7.06 5.15 8.9l76.29 44.04-26.37 15.22c-.28.17-.62.2-.93.09l-63.18-36.48c-27.83-16.12-37.36-51.84-21.49-79.8zm212.24 49.35L172.82 116.2l26.37-15.22c.28-.17.62-.2.93-.09l63.18 36.48c27.86 16.07 37.37 51.84 21.49 79.82-7 12.15-17.73 21.34-30.53 26.19v-74.22c0-3.67-1.96-7.06-5.15-8.9l.17-.28zm26.23-40.47l-.56-.33-62.43-36.04c-3.18-1.85-7.12-1.85-10.31 0l-76.29 44.04V97.62c0-.33.14-.65.38-.87l63.18-36.47c27.86-16.1 63.58-6.56 79.87 21.57 7.01 12.14 9.56 26.37 7.16 40.18v-.36zM107.75 182.37l-26.37-15.22c-.29-.16-.47-.46-.49-.79v-72.85c.02-32.2 26.2-58.28 57.47-58.24 14.02 0 27.18 4.89 37.58 13.51l-.56.32-62.43 36.04c-3.19 1.84-5.15 5.22-5.15 8.9l-.05 88.33zm14.33-30.9l33.98-19.62 33.99 19.62v39.23l-33.99 19.62-33.98-19.62v-39.23z"/>
+                </svg>
+              </div>
+              <div class="plat-info">
+                <span class="plat-name">ChatGPT</span>
+                <span class="plat-url mono">chatgpt.com</span>
+              </div>
+            </div>
+            <div class="tog">
+              <input type="checkbox" id="tog-chatgpt" data-platform="chatgpt">
+              <div class="tog-track"></div>
+              <div class="tog-thumb"></div>
+            </div>
+          </div>
+
+          <div class="platform-row" id="pr-claude">
+            <div class="plat-left">
+              <div class="plat-logo claude-bg">
+                <svg class="logo-claude" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M50 4 L53.5 17.5 L60 8 L59 22 L70 11 L63.5 24 L79 19 L68 30 L85 30 L71 38 L87 43 L71 47 L87 54 L71 56 L85 66 L68 64 L79 77 L63.5 70 L59 82 L60 96 L53.5 86 L50 100 L46.5 86 L40 96 L41 82 L24.5 70 L18 77 L29 64 L15 66 L29 56 L13 54 L29 47 L13 43 L29 38 L15 30 L32 30 L21 19 L36.5 24 L30 11 L41 22 L40 8 L46.5 17.5 Z"/>
+                </svg>
+              </div>
+              <div class="plat-info">
+                <span class="plat-name">Claude</span>
+                <span class="plat-url mono">claude.ai</span>
+              </div>
+            </div>
+            <div class="tog">
+              <input type="checkbox" id="tog-claude" data-platform="claude">
+              <div class="tog-track"></div>
+              <div class="tog-thumb"></div>
+            </div>
+          </div>
+
+          <div class="platform-row" id="pr-gemini">
+            <div class="plat-left">
+              <div class="plat-logo gemini-bg">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="gm-g2" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#EA4335"/>
+                      <stop offset="30%" stop-color="#FBBC04"/>
+                      <stop offset="60%" stop-color="#34A853"/>
+                      <stop offset="100%" stop-color="#4285F4"/>
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#gm-g2)" d="M50 2 C50 2 56 26 56 26 C60 38 62 44 68 50 C62 56 60 62 56 74 L50 98 C50 98 44 74 44 74 C40 62 38 56 32 50 C38 44 40 38 44 26 Z M2 50 C2 50 26 44 26 44 C38 40 44 38 50 32 C56 38 62 40 74 44 L98 50 C98 50 74 56 74 56 C62 60 56 62 50 68 C44 62 38 60 26 56 Z"/>
+                </svg>
+              </div>
+              <div class="plat-info">
+                <span class="plat-name">Gemini</span>
+                <span class="plat-url mono">gemini.google.com</span>
+              </div>
+            </div>
+            <div class="tog">
+              <input type="checkbox" id="tog-gemini" data-platform="gemini">
+              <div class="tog-track"></div>
+              <div class="tog-thumb"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="privacy-note">
+          <span class="privacy-icon">✳</span>
+          <p><strong>Your privacy is non-negotiable.</strong> Pelican only ever listens to you — not the AI. Passwords, API keys, anything that looks secret? Ignored completely. Change your mind anytime, no questions asked.</p>
+        </div>
+
+        <div class="account-selector" role="tablist" aria-label="Account mode">
+          <button type="button" class="mode-tab active" id="tabSignUp" data-mode="signup" role="tab" aria-selected="true">Create account</button>
+          <button type="button" class="mode-tab" id="tabSignIn" data-mode="signin" role="tab" aria-selected="false">Sign in to existing</button>
+        </div>
+        <input type="hidden" id="accountMode" value="signup">
+
+        <div class="google-auth-box" id="step3GoogleBox">
+          <button type="button" class="btn-google" id="step3GoogleSignUpBtn">
+            <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.27 21.43 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.57 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+            </svg>
+            <span id="step3GoogleSignUpText">Create account with Google</span>
+          </button>
+          <button type="button" class="btn-google outline" id="step3GoogleSignInBtn">
+            <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.27 21.43 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.57 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+            </svg>
+            <span id="step3GoogleSignInText">Sign in with Google</span>
+          </button>
+        </div>
+
+        <div class="or-sep" style="margin:18px 0 14px">or continue with email</div>
+
+        <div id="loggedInNotice" class="logged-in-notice" hidden>
+          <span>Signed in as <strong id="loggedInEmail"></strong></span>
+          <button type="button" id="switchAccountBtn">Switch account</button>
+        </div>
+
+        <div class="fields" id="accountFields" style="margin-top:20px">
+          <div class="field">
+            <label for="accountEmail">Account email</label>
+            <input id="accountEmail" type="email" autocomplete="username" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="accountPassword">Password</label>
+            <input id="accountPassword" type="password" autocomplete="current-password" placeholder="Choose a password (8+ characters)">
+          </div>
+          <p id="setup-error" role="alert" aria-live="assertive" style="color:#ffaaa0;font-size:13px;min-height:20px"></p>
+        </div>
+        <div class="step-nav">
+          <button class="btn btn-back" data-step="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+            Back
+          </button>
+          <button class="btn btn-finish" data-action="finish-setup" id="finishBtn">Create account & finish 🎉</button>
+        </div>
+      </div>
+
+      <!-- ════════ SUCCESS ════════ -->
+      <div class="success" id="step-done">
+        <div class="success-spin" aria-hidden="true">✳</div>
+        <h2>Pelican is<br>officially <em>yours</em><span>.</span></h2>
+        <p id="success-message" role="status">Your memories were saved.</p>
+        <a class="btn-cta" href="./dashboard.html">
+          Open my dashboard
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </a>
+        <a id="download-extension" href="./download/pelican-v3.zip" download>Download the Pelican extension ZIP ↗</a>
+      </div>
+
+    </div><!-- /step-content -->
+  </div><!-- /ob-wrap -->
+
+  <script src="./onboarding.js" defer></script>
+</body>
+</html>

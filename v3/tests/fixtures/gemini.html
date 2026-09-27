@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gemini</title>
+</head>
+<body>
+  <div class="app-root">
+    <!-- Side navigation -->
+    <nav class="side-nav">
+      <a href="/app/gemini-saved-convo-1" class="conversation-link">Distributed Consensus</a>
+      <a href="/app/gemini-saved-convo-2" class="conversation-link">Linear Algebra Concepts</a>
+    </nav>
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="conversation-container" id="gemini-messages">
+        <!-- Historical user turn loaded on page visit -->
+        <user-query id="gemini-hist-1">
+          <div class="user-query-container">
+            <div class="user-query-text">Historical user prompt to Gemini.</div>
+          </div>
+        </user-query>
+        <!-- Historical model response -->
+        <model-response id="gemini-hist-2">
+          <div class="model-response-container">
+            <div class="response-container">
+              Historical Gemini model response explaining concepts.
+            </div>
+          </div>
+        </model-response>
+      </div>
+      <!-- Composer input area -->
+      <div class="input-area-container">
+        <rich-textarea>
+          <div contenteditable="true" class="ql-editor" role="textbox" aria-label="Enter a prompt here"></div>
+        </rich-textarea>
+        <button class="send-button" aria-label="Send message" mat-icon-button type="button">
+          <span class="mat-button-wrapper">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </span>
+        </button>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

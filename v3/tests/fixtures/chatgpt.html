@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChatGPT</title>
+</head>
+<body class="antialiased">
+  <div id="__next">
+    <div class="flex h-full w-full">
+      <!-- Navigation Sidebar -->
+      <nav aria-label="Chat history" class="sidebar">
+        <a href="/c/chatgpt-saved-convo-1" class="history-item">Python FastApi Architecture</a>
+        <a href="/c/chatgpt-saved-convo-2" class="history-item">Docker Setup Discussion</a>
+      </nav>
+      <!-- Main Chat Area -->
+      <main class="relative h-full w-full flex-1">
+        <div class="conversation-turns" id="chatgpt-messages">
+          <!-- Historical user turn loaded on page visit -->
+          <div class="group" data-message-author-role="user" data-message-id="hist-msg-1">
+            <div class="whitespace-pre-wrap"><p>Hello ChatGPT, this is an old question from chat history.</p></div>
+          </div>
+          <!-- Historical assistant turn -->
+          <div class="group" data-message-author-role="assistant" data-message-id="hist-msg-2">
+            <div class="markdown prose"><p>Hello! I am ChatGPT. How can I help you today?</p></div>
+          </div>
+        </div>
+        <!-- Composer Form -->
+        <div class="w-full composer-container">
+          <form class="stretch mx-2 flex flex-row">
+            <div class="relative flex h-full flex-1 items-stretch md:flex-col">
+              <textarea id="prompt-textarea" data-id="root" placeholder="Message ChatGPT..."></textarea>
+              <button data-testid="send-button" type="button" aria-label="Send prompt" class="send-btn">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

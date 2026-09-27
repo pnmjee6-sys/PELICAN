@@ -1,0 +1,67 @@
+import type { UserMessageEvent } from './types.ts';
+
+type Pending = { text: string; timer: ReturnType<typeof setTimeout> };
+
+/** Observe rendered user turns without treating a changing DOM node as several messages. */
+export function observeRenderedUserMessages(
+  getNodes: () => Element[],
+  getConversationId: () => string,
+  callback: (message: UserMessageEvent) => void,
+): () => void {
+  const seen = new WeakSet<Element>();
+  const pending = new Map<Element, Pending>();
+  let conversationId = getConversationId();
+
+  const cancelPending = () => {
+    for (const item of pending.values()) clearTimeout(item.timer);
+    pending.clear();
+  };
+  const seedExisting = () => {
+    for (const node of getNodes()) seen.add(node);
+  };
+  seedExisting();
+
+  const scan = () => {
+    const nextId = getConversationId();
+    if (nextId !== conversationId) {
+      // A new-chat placeholder acquiring its real URL is the same conversation.
+      const placeholderBecameReal = conversationId.includes('-new-') && !nextId.includes('-new-');
+      conversationId = nextId;
+      if (!placeholderBecameReal) {
+        cancelPending();
+        seedExisting();
+      }
+    }
+
+    for (const node of getNodes()) {
+      if (seen.has(node)) continue;
+      const text = (node.textContent || '').trim();
+      if (!text) continue;
+      const prior = pending.get(node);
+      if (prior?.text === text) continue;
+      if (prior) clearTimeout(prior.timer);
+
+      const timer = setTimeout(() => {
+        pending.delete(node);
+        if (!node.isConnected || seen.has(node)) return;
+        const finalText = (node.textContent || '').trim();
+        if (finalText !== text) {
+          scan();
+          return;
+        }
+        seen.add(node);
+        callback({ text: finalText, conversationId: getConversationId() });
+      }, 600);
+      pending.set(node, { text, timer });
+    }
+  };
+
+  const observer = new MutationObserver(scan);
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  window.addEventListener('popstate', scan);
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('popstate', scan);
+    cancelPending();
+  };
+}

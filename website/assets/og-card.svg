@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f4f4f2"/>
+  <path d="M600 0v630" stroke="#e0e0dc"/>
+  <rect x="330" y="26" width="540" height="48" rx="5" fill="#201d1d"/>
+  <path d="M346 50h20m-20 5h20" stroke="#f4f4f2" stroke-width="2"/>
+  <text x="379" y="56" fill="#f4f4f2" font-family="Helvetica Neue,Arial,sans-serif" font-size="16">Menu</text>
+  <text x="536" y="58" fill="#f4f4f2" font-family="Helvetica Neue,Arial,sans-serif" font-weight="bold" font-size="27" letter-spacing="-2">pelican</text>
+  <rect x="783" y="32" width="78" height="36" rx="3" fill="#b8ff72"/>
+  <text x="801" y="55" fill="#201d1d" font-family="Helvetica Neue,Arial,sans-serif" font-size="16">Try it</text>
+  <rect x="330" y="79" width="540" height="18" fill="#b8ff72"/>
+  <text x="343" y="92" fill="#201d1d" font-family="monospace" font-size="9">✳ MEET PELICAN  ✳  PICK UP WHERE YOU LEFT OFF  ✳  YOUR MEMORIES, YOUR CHOICE</text>
+  <text x="600" y="165" text-anchor="middle" fill="#201d1d" font-family="monospace" font-size="13" letter-spacing="2">PELICAN / YOUR MEMORY FOR AI</text>
+  <text x="600" y="338" text-anchor="middle" fill="#201d1d" font-family="Helvetica Neue,Arial,sans-serif" font-weight="600" font-size="99" letter-spacing="-5">Stop starting over<tspan fill="#6840ff">.</tspan></text>
+  <text x="600" y="409" text-anchor="middle" fill="#201d1d" font-family="Helvetica Neue,Arial,sans-serif" font-size="26">Your details, ready for the next conversation.</text>
+  <g transform="translate(125 500) rotate(-8)"><rect width="290" height="195" rx="5" fill="#201d1d"/><rect x="6" y="6" width="278" height="158" fill="#6840ff"/><text x="25" y="39" fill="white" font-family="monospace" font-size="13">01 / CAPTURE</text><rect x="42" y="67" width="213" height="57" rx="7" fill="#f4f4f2"/><text x="55" y="94" fill="#201d1d" font-family="Helvetica Neue,Arial,sans-serif" font-size="15">Remember what matters.</text></g>
+  <g transform="translate(455 475)"><rect width="290" height="195" rx="5" fill="#201d1d"/><rect x="6" y="6" width="278" height="158" fill="#101010"/><text x="24" y="38" fill="white" font-family="monospace" font-size="13">02 / REMEMBER</text><text x="145" y="133" text-anchor="middle" fill="#b8ff72" font-family="Helvetica Neue,Arial,sans-serif" font-size="110">✳</text></g>
+  <g transform="translate(785 500) rotate(8)"><rect width="290" height="195" rx="5" fill="#201d1d"/><rect x="6" y="6" width="278" height="158" fill="#b8ff72"/><text x="25" y="39" fill="#201d1d" font-family="monospace" font-size="13">03 / APPROVE</text><rect x="42" y="67" width="213" height="57" rx="7" fill="#f4f4f2"/><text x="55" y="94" fill="#201d1d" font-family="Helvetica Neue,Arial,sans-serif" font-size="15">Your choice, every time.</text></g>
+</svg>

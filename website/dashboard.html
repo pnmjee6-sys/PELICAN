@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#201d1d">
+  <title>My memories — Pelican</title>
+  <link rel="icon" href="./assets/pelican-head.png" type="image/png">
+  <link rel="preload" href="./assets/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./dashboard.css">
+  <script src="./dashboard.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#dashboardMain">Skip to dashboard</a>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="Pelican home">pelican<img src="./assets/pelican-head.png" alt=""></a>
+    <span class="topbar-label mono">YOUR MEMORY, YOUR RULES</span>
+    <a class="topbar-action" href="./onboarding.html">Add context <span aria-hidden="true">↗</span></a>
+    <div id="globalAccount" class="global-account" hidden><span id="accountEmail"></span><button id="globalSignOutBtn" type="button">Log out</button></div>
+  </header>
+  <div class="halo" aria-hidden="true"></div>
+  <div class="dashboard-shell">
+    <aside class="sidebar" aria-label="Dashboard navigation">
+      <a class="sidebar-brand" href="./index.html" aria-label="Pelican home">pelican<img src="./assets/pelican-head.png" alt=""></a>
+      <nav id="dashboardNav">
+        <button type="button" class="nav-item active" data-view="overview" aria-current="page"><span aria-hidden="true">✳</span> My memories <strong id="navCount">00</strong></button>
+        <button type="button" class="nav-item" data-view="use"><span aria-hidden="true">◌</span> Use a memory</button>
+        <button type="button" class="nav-item" data-view="preferences"><span aria-hidden="true">▤</span> Preferences</button>
+        <button type="button" class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span><span id="sidebarStatus">Checking connection</span></div>
+    </aside>
+    <main id="dashboardMain" class="main">
+      <div class="toolbar mono"><span id="viewBreadcrumb">MY MEMORIES / OVERVIEW</span><span class="privacy-tag">PRIVATE BY DESIGN <i aria-hidden="true"></i></span></div>
+
+      <section id="authGate" class="auth-gate" aria-labelledby="authTitle" hidden>
+        <p class="eyebrow mono">A SPACE THAT'S YOURS</p>
+        <h1 id="authTitle">Welcome back<span>.</span></h1>
+        <p>Sign in to see the memories you chose to keep. Your password stays in this form and is never stored here.</p>
+
+        <div class="google-auth-box">
+          <button type="button" class="btn-google" id="dashGoogleSignInBtn">
+            <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.27 21.43 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.57 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+            </svg>
+            <span>Sign in with Google</span>
+          </button>
+          <button type="button" class="btn-google outline" id="dashGoogleSignUpBtn">
+            <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.27 21.43 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.57 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+            </svg>
+            <span>Create account with Google</span>
+          </button>
+        </div>
+
+        <div class="or-sep">or sign in with email and password</div>
+
+        <form id="authForm">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="username" required placeholder="you@example.com">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" required placeholder="Your password">
+          <div class="auth-actions"><button id="signInBtn" class="button lime" type="submit">Sign in ↗</button><button id="signUpBtn" class="button ghost" type="button">Create account</button></div>
+          <p id="authError" class="error-text" role="alert"></p>
+        </form>
+      </section>
+
+      <div id="dashboardViews" hidden>
+        <section class="view active" data-view-panel="overview" aria-labelledby="overviewTitle">
+          <h1 id="overviewTitle">Good to see you<span>.</span></h1>
+          <p class="lead">The details you chose to keep, all in one place.</p>
+          <div class="stats">
+            <div class="stat"><span class="mono">MEMORIES</span><strong id="memoryCount">00</strong><small>Across your AI tools</small></div>
+            <div class="stat"><span class="mono">ASSISTANTS</span><strong>03</strong><small>One shared context</small></div>
+            <div class="stat"><span class="mono">CAPTURE</span><strong id="captureStatus">OFF</strong><small>Only where you choose</small></div>
+          </div>
+          <div class="section-head"><h2>Recently saved</h2><button class="text-link" type="button" data-go="memories">View all ↗</button></div>
+          <div id="recentList" class="memory-list" aria-live="polite"></div>
+        </section>
+
+        <section class="view" data-view-panel="memories" aria-labelledby="memoriesTitle">
+          <p class="eyebrow mono">YOUR MEMORY / VAULT</p>
+          <h1 id="memoriesTitle">Everything in one place<span>.</span></h1>
+          <p class="lead">Correct, block, or forget a detail whenever you want.</p>
+          <div class="section-head"><h2>Saved details</h2><a class="text-link" href="./onboarding.html">Add more ↗</a></div>
+          <label class="search-label" for="memoryFilter">Filter memories</label>
+          <input id="memoryFilter" class="search-input" type="search" placeholder="Search your saved details">
+          <div id="allMemoryList" class="memory-list" aria-live="polite"></div>
+        </section>
+
+        <section class="view" data-view-panel="use" aria-labelledby="useTitle">
+          <p class="eyebrow mono">YOUR MEMORY / USE</p>
+          <h1 id="useTitle">Bring the right detail back<span>.</span></h1>
+          <p class="lead">Tell Pelican what you're working on. Private details appear separately and need your approval.</p>
+          <form id="recallForm" class="recall-form"><label for="recallQuery">What are you asking your AI assistant?</label><textarea id="recallQuery" rows="4" maxlength="16000" required placeholder="For example: Help me plan a TypeScript browser extension…"></textarea><button class="button lime" type="submit">Find useful memories ↗</button></form>
+          <p id="recallStatus" class="notice" role="status"></p>
+          <div id="recallResults" class="recall-results" hidden><div class="section-head"><h2>Ready to use</h2><span class="mono">UP TO 3 GENERAL MEMORIES</span></div><div id="generalResults" class="memory-list"></div><div id="sensitiveWrap" hidden><h2 class="sensitive-title">Private details — allow once?</h2><p class="hint">Unchecked details stay out of the copied context.</p><div id="sensitiveResults" class="memory-list"></div></div><button id="copyContextBtn" class="button purple" type="button">Copy approved context ↗</button></div>
+        </section>
+
+        <section class="view" data-view-panel="preferences" aria-labelledby="preferencesTitle">
+          <p class="eyebrow mono">YOUR MEMORY / PREFERENCES</p>
+          <h1 id="preferencesTitle">Your way of asking<span>.</span></h1>
+          <p class="lead">Pelican learns how you like answers explained. Your corrections take priority.</p>
+          <div id="preferenceList" class="memory-list" aria-live="polite"></div>
+        </section>
+
+        <section class="view" data-view-panel="settings" aria-labelledby="settingsTitle">
+          <p class="eyebrow mono">YOUR MEMORY / SETTINGS</p>
+          <h1 id="settingsTitle">Stay in control<span>.</span></h1>
+          <p class="lead">Your memories live in your account. Capture is controlled separately for each AI site.</p>
+          <div class="setting-card"><span class="mono">BACKEND</span><strong id="backendStatus">Checking…</strong><small id="backendAddress"></small></div>
+          <div class="setting-card"><span class="mono">CAPTURE SITES</span><div id="siteToggles"></div><small id="captureHelp">Open the extension to control capture on each site.</small></div>
+          <button id="signOutBtn" class="button ghost" type="button">Sign out</button>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

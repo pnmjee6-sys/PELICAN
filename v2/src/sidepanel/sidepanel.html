@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Context Passport</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="cp-app">
+    <!-- Top Brand Header -->
+    <header class="cp-header">
+      <div class="cp-brand">
+        <div class="cp-brand-logo">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+        </div>
+        <div class="cp-brand-text">
+          <div class="cp-brand-title">Context Passport</div>
+          <div class="cp-brand-sub">Privacy-First AI Memory</div>
+        </div>
+      </div>
+      <div id="connection-badge" class="cp-badge cp-badge-neutral">Checking...</div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="cp-nav">
+      <button class="cp-nav-btn active" data-tab="vault">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Vault
+      </button>
+      <button class="cp-nav-btn" data-tab="preferences">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+        Learned
+      </button>
+      <button class="cp-nav-btn" data-tab="fallback">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+        Fallback
+      </button>
+      <button class="cp-nav-btn" data-tab="settings">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Settings
+      </button>
+    </nav>
+
+    <!-- TAB 1: VAULT -->
+    <main id="tab-vault" class="cp-tab-pane active">
+      <div class="cp-section-header">
+        <div class="cp-section-title">Memory Vault</div>
+        <button id="vault-refresh-btn" class="cp-icon-btn" title="Refresh">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="vault-list" class="cp-card-list">
+        <div class="cp-empty-state">Loading memories...</div>
+      </div>
+    </main>
+
+    <!-- TAB 2: LEARNED PREFERENCES -->
+    <main id="tab-preferences" class="cp-tab-pane">
+      <div class="cp-section-header">
+        <div class="cp-section-title">Explanation Preferences</div>
+        <button id="pref-refresh-btn" class="cp-icon-btn" title="Refresh">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
+      </div>
+      <p class="cp-hint-text">
+        Automatically learned when at least 3 distinct observations occur across 2+ chats.
+      </p>
+      <div id="preferences-list" class="cp-card-list">
+        <div class="cp-empty-state">No preferences promoted yet.</div>
+      </div>
+    </main>
+
+    <!-- TAB 3: UNIVERSAL FALLBACK ROUTE -->
+    <main id="tab-fallback" class="cp-tab-pane">
+      <div class="cp-section-header">
+        <div class="cp-section-title">Universal Fallback</div>
+      </div>
+      <p class="cp-hint-text">
+        Prepare prompts with memory context for any site or when site DOM changes.
+      </p>
+
+      <div class="cp-form-group">
+        <label for="fallback-input" class="cp-label">Draft Prompt</label>
+        <textarea id="fallback-input" class="cp-textarea" placeholder="Paste your query or draft prompt here..." rows="3"></textarea>
+      </div>
+
+      <button id="fallback-retrieve-btn" class="cp-btn cp-btn-primary w-full">
+        Retrieve Relevant Memories
+      </button>
+
+      <div id="fallback-sensitive-panel" class="cp-sensitive-alert" style="display: none;">
+        <div class="cp-sensitive-alert-header">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          <span>Sensitive Memory Found</span>
+        </div>
+        <div id="fallback-sensitive-text" class="cp-sensitive-alert-body"></div>
+        <label class="cp-checkbox-label">
+          <input type="checkbox" id="fallback-allow-sensitive">
+          <span>Allow this sensitive memory once</span>
+        </label>
+      </div>
+
+      <div class="cp-form-group" style="margin-top: 14px;">
+        <label for="fallback-output" class="cp-label">Prepared Prompt (with Memory)</label>
+        <textarea id="fallback-output" class="cp-textarea" rows="6" readonly placeholder="Prepared prompt will appear here..."></textarea>
+      </div>
+
+      <button id="fallback-copy-btn" class="cp-btn cp-btn-secondary w-full">
+        Copy Prepared Prompt
+      </button>
+    </main>
+
+    <!-- TAB 4: SETTINGS & PER-SITE TOGGLES -->
+    <main id="tab-settings" class="cp-tab-pane">
+      <div class="cp-section-header">
+        <div class="cp-section-title">Site Capture Toggles</div>
+      </div>
+      <p class="cp-hint-text">
+        Capture is <strong>OFF by default</strong>. Enable per site to capture only your completed turns.
+      </p>
+
+      <div class="cp-toggle-card">
+        <div class="cp-toggle-info">
+          <div class="cp-toggle-name">ChatGPT</div>
+          <div class="cp-toggle-url">chatgpt.com</div>
+        </div>
+        <label class="cp-switch">
+          <input type="checkbox" id="toggle-chatgpt">
+          <span class="cp-slider"></span>
+        </label>
+      </div>
+
+      <div class="cp-toggle-card">
+        <div class="cp-toggle-info">
+          <div class="cp-toggle-name">Claude</div>
+          <div class="cp-toggle-url">claude.ai</div>
+        </div>
+        <label class="cp-switch">
+          <input type="checkbox" id="toggle-claude">
+          <span class="cp-slider"></span>
+        </label>
+      </div>
+
+      <div class="cp-toggle-card">
+        <div class="cp-toggle-info">
+          <div class="cp-toggle-name">Gemini Web</div>
+          <div class="cp-toggle-url">gemini.google.com</div>
+        </div>
+        <label class="cp-switch">
+          <input type="checkbox" id="toggle-gemini">
+          <span class="cp-slider"></span>
+        </label>
+      </div>
+
+      <div class="cp-section-header" style="margin-top: 20px;">
+        <div class="cp-section-title">Backend & Auth</div>
+      </div>
+
+      <div class="cp-form-group">
+        <label for="setting-backend-url" class="cp-label">FastAPI Backend URL</label>
+        <input type="text" id="setting-backend-url" class="cp-input" value="http://localhost:8000">
+      </div>
+
+      <div class="cp-form-group">
+        <label for="setting-email" class="cp-label">Email</label>
+        <input type="email" id="setting-email" class="cp-input" autocomplete="username" placeholder="Your account email">
+      </div>
+
+      <div class="cp-form-group">
+        <label for="setting-password" class="cp-label">Password</label>
+        <input type="password" id="setting-password" class="cp-input" autocomplete="current-password" placeholder="Used only to sign in">
+      </div>
+
+      <button id="sign-in-btn" class="cp-btn cp-btn-primary w-full">Sign in</button>
+      <button id="sign-out-btn" class="cp-btn cp-btn-secondary w-full" style="margin-top: 8px;">Sign out</button>
+      <p id="auth-message" class="cp-hint-text" role="status"></p>
+
+      <div class="cp-form-group" style="margin-top: 16px;">
+        <label for="setting-auth-token" class="cp-label">Supabase Auth Bearer Token</label>
+        <input type="password" id="setting-auth-token" class="cp-input" placeholder="Advanced: test token or existing JWT">
+      </div>
+
+      <button id="save-settings-btn" class="cp-btn cp-btn-primary w-full">
+        Save Settings
+      </button>
+    </main>
+
+    <!-- Footer -->
+    <footer class="cp-footer">
+      <span>Context Passport v2.0 • Privacy Firewall Active</span>
+    </footer>
+  </div>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

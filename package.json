@@ -1,0 +1,35 @@
+{
+  "name": "context-passport",
+  "version": "0.1.0",
+  "description": "Context Passport V3: self-improving, privacy-first browser memory for ChatGPT, Claude, and Gemini",
+  "private": true,
+  "workspaces": [
+    "extension",
+    "v2",
+    "v3"
+  ],
+  "scripts": {
+    "build": "npm run build:v3",
+    "test": "PYTHONPATH=backend backend/.venv/bin/python -m pytest backend/tests",
+    "start": "HOST=127.0.0.1 PORT=8000 PYTHONPATH=backend backend/.venv/bin/python backend/server.py",
+    "gate:audit": "PYTHONPATH=backend backend/.venv/bin/python backend/inspect_mem0.py",
+    "gate:history": "PYTHONPATH=backend backend/.venv/bin/python backend/test_mem0_history_audit.py",
+    "gate:services": "PYTHONPATH=backend backend/.venv/bin/python backend/check_services.py",
+    "gate:gemini": "PYTHONPATH=backend backend/.venv/bin/python backend/prove_gemini.py",
+    "gate:openrouter": "PYTHONPATH=backend backend/.venv/bin/python backend/benchmark_routing.py --mock",
+    "benchmark:openrouter": "PYTHONPATH=backend backend/.venv/bin/python backend/benchmark_routing.py",
+    "gate:supabase": "PYTHONPATH=backend backend/.venv/bin/python backend/prove_supabase.py",
+    "gate:index": "PYTHONPATH=backend backend/.venv/bin/python backend/verify_atlas_index.py --wait 300",
+    "gate:index:inspect": "PYTHONPATH=backend backend/.venv/bin/python backend/inspect_atlas_indexes.py",
+    "gate:memory": "PYTHONPATH=backend backend/.venv/bin/python backend/test_isolation.py",
+    "gate:v1": "APP_ENV=test ALLOW_TEST_AUTH=true backend/.venv/bin/python scripts/verify_v1.py",
+    "build:v2": "npm run --prefix v2 build",
+    "test:v2": "npm run --prefix v2 test",
+    "gate:v2": "APP_ENV=test ALLOW_TEST_AUTH=true backend/.venv/bin/python v2/verify_v2.py",
+    "build:v3": "npm run --prefix v3 build",
+    "package:v3": "npm run build:v3 && python3.11 scripts/package_release.py",
+    "test:v3": "npm run --prefix v3 typecheck && npm run --prefix v3 test && PYTHONPATH=backend backend/.venv/bin/python -m pytest backend/tests/test_v3_lifecycle.py backend/tests/test_step4_ingest_privacy_preferences.py backend/tests/test_step7_vault_lifecycle.py backend/tests/test_step8_local_runtime_reliability.py backend/tests/test_step10_routing_benchmarking.py -q",
+    "test:integration": "APP_ENV=test ALLOW_TEST_AUTH=true RUN_INTEGRATION_TESTS=true ALLOW_OFFLINE_EMBEDDINGS=false USE_MOCK_EXTRACTOR=false USE_MOCK_EMBEDDER=false LLM_PROVIDER=openrouter EMBEDDING_PROVIDER=openrouter ENABLE_JEV_VALIDATION=true PYTHONPATH=backend backend/.venv/bin/python -m pytest backend/tests/test_v1_working_brain.py -m integration"
+  },
+  "devDependencies": {}
+}
